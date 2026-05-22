@@ -1,0 +1,52 @@
+# ── Python ────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.Python
+env/
+venv/
+.venv/
+ENV/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ── Testing ───────────────────────────────────────────────
+.tox/
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ── Jupyter ───────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# ── Data & Outputs (auto-generated) ───────────────────────
+data/*.json
+data/*.csv
+!data/committee_assignments_example.csv
+outputs/*.png
+outputs/*.csv
+outputs/*.html
+
+# ── Environment & Secrets ─────────────────────────────────
+.env
+.env.*
+*.env
+secrets.yaml
+
+# ── IDE / OS ──────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+Thumbs.db
+*.swp
+*.swo
