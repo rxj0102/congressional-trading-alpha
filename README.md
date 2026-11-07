@@ -1,5 +1,7 @@
 # Congressional Trading Lag Arbitrage
 
+[![CI](https://github.com/rxj0102/congressional-trading-alpha/actions/workflows/ci.yml/badge.svg)](https://github.com/rxj0102/congressional-trading-alpha/actions/workflows/ci.yml)
+
 A quantitative research project that exploits the informational asymmetry embedded in the U.S. STOCK Act's mandatory 45-day congressional disclosure window.  Using publicly available trade filings from House and Senate members, this repository constructs a composite ranking signal, validates it with OLS regression, and backtests a weekly long/short equity strategy — all with reproducible, production-quality Python code.
 
 ---
