@@ -176,3 +176,8 @@ cp /path/to/your/assignments.csv data/committee_assignments_example.csv
 > The authors make no representations about the accuracy or completeness of the data sourced from third-party APIs.  
 > Trading on material non-public information is illegal; this project exclusively analyses information that is already in the public domain (STOCK Act disclosures).  
 > Always consult a qualified financial professional before making investment decisions.
+
+## Known limitations
+
+- **Full-sample ranking.** `rank_signals` computes decile/LONG/SHORT cutoffs from the whole disclosure history at once, so the thresholds applied to early weeks use information from later weeks. A point-in-time version would use an expanding (or trailing) window of past scores only.
+- **Coverage score is current, not historical.** `compute_coverage_score` counts today's Finviz headlines, which is not what the market could see at the disclosure date.

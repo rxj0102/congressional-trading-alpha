@@ -167,13 +167,8 @@ def run_backtest(
         week_df = positions_df[positions_df["week"] == week]
 
         # Entry on Monday of the *next* ISO week
-        base_year, base_week = week.split("-W")
-        next_week_num = int(base_week) + 1
-        next_year = int(base_year)
-        if next_week_num > 52:
-            next_week_num = 1
-            next_year += 1
-        entry_date = pd.Timestamp.fromisocalendar(next_year, next_week_num, 1)
+        # Monday of this ISO week + 7 days (handles 53-week ISO years)
+        entry_date = _week_to_entry_date(week) + pd.Timedelta(days=7)
 
         long_tickers = week_df[week_df["position"] == "LONG"]["ticker"].tolist()
         short_tickers = week_df[week_df["position"] == "SHORT"]["ticker"].tolist()
