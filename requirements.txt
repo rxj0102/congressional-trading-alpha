@@ -9,3 +9,6 @@ beautifulsoup4>=4.12.0
 lxml>=5.1.0
 jupyter>=1.0.0
 scikit-learn>=1.4.0
+
+# Testing
+pytest>=7.0
