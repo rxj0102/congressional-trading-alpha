@@ -190,6 +190,17 @@ The test suite (11 tests) finishes in about 25 seconds on the machine above, inc
 Citation metadata is in `CITATION.cff`. GitHub turns it into a Cite this repository button on the repo page.
 
 
+### Signal documentation
+
+| Field | Value |
+|---|---|
+| Signal | composite = direction x ln(1 + lag_days) x committee_weight x 1 / (1 + coverage_score) |
+| Expected sign | Positive: late-disclosed buys by influential committee members in thinly covered stocks outperform |
+| Book | Weekly, top decile long and bottom decile short (`TOP_DECILE_THRESHOLD` = 0.9), held 10 trading days, entry at the Monday open after the signal week |
+| Inputs | STOCK Act periodic transaction reports, committee assignments, Finviz news counts as a coverage proxy, prices (yfinance) |
+| Code | `src/scraper.py`, `src/features.py`, `src/signal.py`, `src/backtest.py` |
+| Status | Not run. The House and Senate Stock Watcher feeds returned HTTP 403 from the environment used for this review. Two design points to resolve before a run: `coverage_score` comes from a current Finviz snapshot, so applying it to past trades uses information from after the trade (the code docstring already flags this), `data/committee_assignments_example.csv` is an example file rather than sourced assignments, and `COMMITTEE_WEIGHTS` in `config.py` are judgment calls |
+
 ## Academic References
 
 - **Karadas, Salim, Jahangir Sultan, and Omer Faruk Erol (2017).** "Do Members of U.S. Congress Trade on Non-Public Information?" *North American Journal of Economics and Finance* 42: 143–158.
