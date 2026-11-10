@@ -160,6 +160,36 @@ cp /path/to/your/assignments.csv data/committee_assignments_example.csv
 
 ---
 
+## Reproducibility
+
+### Data availability
+
+All inputs come from free, public sources. No paid data or API keys are required unless noted.
+
+- Yahoo Finance via the yfinance package (free, no key)
+- Congressional trading disclosures (free public filings)
+- Files shipped in the `data/` folder of this repository
+
+### Computational requirements
+
+- Python 3.12.3. Every dependency version is pinned in `uv.lock`.
+- Checked on Linux x86_64 with 2 CPU cores and 8 GB RAM. No GPU is needed.
+
+```bash
+pip install uv     # once
+uv sync            # installs the exact pinned environment
+uv run pytest -q   # runs the test suite
+```
+
+### Runtime
+
+The test suite (11 tests) finishes in about 25 seconds on the machine above, including any data downloads it triggers.
+
+### Citation
+
+Citation metadata is in `CITATION.cff`. GitHub turns it into a Cite this repository button on the repo page.
+
+
 ## Academic References
 
 - **Karadas, Salim, Jahangir Sultan, and Omer Faruk Erol (2017).** "Do Members of U.S. Congress Trade on Non-Public Information?" *North American Journal of Economics and Finance* 42: 143–158.
