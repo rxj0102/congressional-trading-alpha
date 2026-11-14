@@ -2,13 +2,13 @@
 
 [![CI](https://github.com/rxj0102/congressional-trading-alpha/actions/workflows/ci.yml/badge.svg)](https://github.com/rxj0102/congressional-trading-alpha/actions/workflows/ci.yml)
 
-A quantitative research project that exploits the informational asymmetry embedded in the U.S. STOCK Act's mandatory 45-day congressional disclosure window.  Using publicly available trade filings from House and Senate members, this repository constructs a composite ranking signal, validates it with OLS regression, and backtests a weekly long/short equity strategy — all with reproducible, production-quality Python code.
+A quantitative research project that exploits the informational asymmetry embedded in the U.S. STOCK Act's mandatory 45-day congressional disclosure window.  Using publicly available trade filings from House and Senate members, this repository constructs a composite ranking signal, validates it with OLS regression, and backtests a weekly long/short equity strategy: all with reproducible, production-quality Python code.
 
 ---
 
 ## Overview
 
-Members of Congress possess material non-public information by virtue of their legislative and oversight responsibilities.  The **STOCK Act (2012)** requires them to publicly disclose personal stock trades within 45 calendar days — creating a known, bounded window of informational advantage that can be systematically exploited after the disclosure becomes public.
+Members of Congress possess material non-public information by virtue of their legislative and oversight responsibilities.  The **STOCK Act (2012)** requires them to publicly disclose personal stock trades within 45 calendar days: creating a known, bounded window of informational advantage that can be systematically exploited after the disclosure becomes public.
 
 This project operationalises that insight into a quantitative signal by combining three observable features:
 
@@ -32,7 +32,7 @@ This project operationalises that insight into a quantitative signal by combinin
 |---|---|---|
 | House Stock Watcher | `housestockwatcher.com/api` | JSON API of House member disclosures |
 | Senate Stock Watcher | `senatestockwatcher.com/api` | JSON API of Senate member disclosures |
-| Yahoo Finance (via yfinance) | — | Adjusted daily close prices |
+| Yahoo Finance (via yfinance) | n/a | Adjusted daily close prices |
 | Finviz | `finviz.com/quote.ashx` | News article count as coverage proxy |
 
 All raw API responses are cached in `data/` as JSON files keyed by fetch date, so re-runs do not re-scrape.
@@ -49,10 +49,10 @@ $$
 
 **Component interpretation:**
 
-- $\text{direction} \in \{+1, -1\}$ — preserves the sign; buys are bullish signals, sells are bearish.
-- $\ln(1 + \text{lag\_days})$ — log-dampened lag rewards disclosures filed late without letting extreme values dominate; bounded and slow-growing.
-- $w_{\text{committee}}$ — scalar weight ∈ [0.5, 1.0] reflecting legislative oversight power over traded sectors.
-- $\frac{1}{1+\text{coverage\_score}}$ — inverse Finviz article count; discounts well-followed mega-caps, amplifies obscure small-caps where the information edge is largest.
+- $\text{direction} \in \{+1, -1\}$: preserves the sign; buys are bullish signals, sells are bearish.
+- $\ln(1 + \text{lag\_days})$: log-dampened lag rewards disclosures filed late without letting extreme values dominate; bounded and slow-growing.
+- $w_{\text{committee}}$: scalar weight ∈ [0.5, 1.0] reflecting legislative oversight power over traded sectors.
+- $\frac{1}{1+\text{coverage\_score}}$: inverse Finviz article count; discounts well-followed mega-caps, amplifies obscure small-caps where the information edge is largest.
 
 ### Committee Influence Weights
 
@@ -203,11 +203,11 @@ Citation metadata is in `CITATION.cff`. GitHub turns it into a Cite this reposit
 
 ## Academic References
 
-- **Karadas, Salim, Jahangir Sultan, and Omer Faruk Erol (2017).** "Do Members of U.S. Congress Trade on Non-Public Information?" *North American Journal of Economics and Finance* 42: 143–158.
+- **Karadas, Salim, Jahangir Sultan, and Omer Faruk Erol (2017).** *Do Members of U.S. Congress Trade on Non-Public Information?* *North American Journal of Economics and Finance* 42: 143–158.
 
-- **Eggers, Andrew C., and Jens Hainmueller (2013).** "Capitol Losses: The Mediocre Performance of Congressional Stock Portfolios." *Journal of Politics* 75(2): 535–551.
+- **Eggers, Andrew C., and Jens Hainmueller (2013).** *Capitol Losses: The Mediocre Performance of Congressional Stock Portfolios.* *Journal of Politics* 75(2): 535–551.
 
-- **Ziobrowski, Alan J., Ping Cheng, James W. Boyd, and Brigitte J. Ziobrowski (2004).** "Abnormal Returns from the Common Stock Investments of the United States Senate." *Journal of Financial and Quantitative Analysis* 39(4): 661–676.
+- **Ziobrowski, Alan J., Ping Cheng, James W. Boyd, and Brigitte J. Ziobrowski (2004).** *Abnormal Returns from the Common Stock Investments of the United States Senate.* *Journal of Financial and Quantitative Analysis* 39(4): 661–676.
 
 ---
 
