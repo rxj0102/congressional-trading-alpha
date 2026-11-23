@@ -50,3 +50,10 @@ secrets.yaml
 Thumbs.db
 *.swp
 *.swo
+
+# Rebuilt study: raw downloads are not committed
+data/house_raw/
+data/prices.parquet
+!data/house_ptr_transactions.csv
+!data/house_ptr_index.csv
+!data/ff3_daily.csv

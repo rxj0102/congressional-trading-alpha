@@ -71,14 +71,33 @@ def _scored(n=100, seed=0):
     )
 
 
-def test_rank_signals_deciles_and_positions():
-    out = sg.rank_signals(_scored())
+def test_rank_signals_full_sample_deciles_and_positions():
+    out = sg.rank_signals(_scored(), point_in_time=False)
     assert out["decile"].min() == 1 and out["decile"].max() == 10
     longs = out[out["position"] == "LONG"]
     shorts = out[out["position"] == "SHORT"]
     assert len(longs) >= 9 and len(shorts) >= 9
     assert longs["composite_score"].min() > shorts["composite_score"].max()
     assert (longs["composite_score"] > 0).all() and (shorts["composite_score"] < 0).all()
+
+
+def test_rank_signals_point_in_time_uses_only_earlier_scores():
+    df = _scored(n=300, seed=1)
+    out = sg.rank_signals(df, min_history=50).sort_values("disclosure_date")
+    assert (out["position"].iloc[:50] == "NEUTRAL").all()
+    assert out["decile"].iloc[:50].isna().all()
+    # changing a later score never changes an earlier position
+    df2 = df.copy()
+    df2.loc[df2.index[-1], "composite_score"] = 1e6
+    out2 = sg.rank_signals(df2, min_history=50).sort_values("disclosure_date")
+    pd.testing.assert_series_equal(
+        out["position"].iloc[:-1].reset_index(drop=True),
+        out2["position"].iloc[:-1].reset_index(drop=True),
+    )
+    longs = out[out["position"] == "LONG"]
+    shorts = out[out["position"] == "SHORT"]
+    assert len(longs) > 0 and len(shorts) > 0
+    assert longs["composite_score"].mean() > shorts["composite_score"].mean()
 
 
 def test_weekly_positions_deduplicates_same_ticker_week():
