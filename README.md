@@ -222,5 +222,5 @@ Citation metadata is in `CITATION.cff`. GitHub turns it into a Cite this reposit
 
 ## Known limitations
 
-- **Full-sample ranking.** `rank_signals` computes decile/LONG/SHORT cutoffs from the whole disclosure history at once, so the thresholds applied to early weeks use information from later weeks. A point-in-time version would use an expanding (or trailing) window of past scores only.
+- **Ranking is point in time.** `rank_signals` ranks each disclosure only against scores disclosed on earlier dates and needs 50 of them first. Earlier versions set the cutoffs from the whole history, which looked ahead; `point_in_time=False` keeps that version for comparison only.
 - **Coverage score is current, not historical.** `compute_coverage_score` counts today's Finviz headlines, which is not what the market could see at the disclosure date.

@@ -159,66 +159,65 @@ def run_ols_regression(
 
 # ── Signal ranking ────────────────────────────────────────────────────────────
 
-def rank_signals(df: pd.DataFrame) -> pd.DataFrame:
+def rank_signals(
+    df: pd.DataFrame, point_in_time: bool = True, min_history: int = 50
+) -> pd.DataFrame:
     """
-    Sort disclosures by ``composite_score`` and assign decile ranks.
+    Assign decile ranks and LONG / SHORT / NEUTRAL positions from ``composite_score``.
 
     Parameters
     ----------
     df : pd.DataFrame
-        Enriched disclosures DataFrame with a ``composite_score`` column.
+        Enriched disclosures with ``composite_score`` and ``disclosure_date``.
+    point_in_time : bool, default True
+        If True, each disclosure is ranked only against scores disclosed on earlier
+        dates, so no cutoff uses information from the future. The first
+        disclosures, before ``min_history`` earlier scores exist, are NEUTRAL with
+        no decile. If False, deciles and cutoffs come from the whole sample, which
+        looks ahead and is kept only for comparison.
+    min_history : int, default 50
+        Earlier scores required before a disclosure can be ranked.
 
     Returns
     -------
     pd.DataFrame
-        Input DataFrame with two additional columns:
-
-        ``decile``
-            Integer 1–10; 10 = highest composite score.
-        ``position``
-            String ``"LONG"`` for the top decile, ``"SHORT"`` for the bottom
-            decile, ``"NEUTRAL"`` otherwise.
-
-    Notes
-    -----
-    Decile assignment uses ``pd.qcut`` with duplicate-edge handling via
-    ``duplicates="drop"``.  When the score distribution is degenerate (many
-    ties), fewer than 10 distinct buckets may be produced; ``decile`` values
-    are then mapped to the available buckets.
+        Input with ``decile`` (1 to 10, 10 = highest score; NaN when unranked)
+        and ``position``.
     """
-    df = df.copy().sort_values("composite_score", ascending=False)
-
-    try:
-        df["decile"] = pd.qcut(
-            df["composite_score"],
-            q=10,
-            labels=False,
-            duplicates="drop",
-        )
-        # pd.qcut labels are 0-indexed; shift to 1-indexed
-        df["decile"] = df["decile"] + 1
-    except ValueError:
-        logger.warning(
-            "qcut failed (likely too many ties) — falling back to rank-based decile."
-        )
-        df["decile"] = (
-            df["composite_score"]
-            .rank(pct=True, method="first")
-            .mul(10)
-            .clip(1, 10)
-            .round()
-            .astype(int)
-        )
-
-    top_cut = df["composite_score"].quantile(config.TOP_DECILE_THRESHOLD)
-    bot_cut = df["composite_score"].quantile(1 - config.TOP_DECILE_THRESHOLD)
-
-    df["position"] = "NEUTRAL"
-    df.loc[df["composite_score"] >= top_cut, "position"] = "LONG"
-    df.loc[df["composite_score"] <= bot_cut, "position"] = "SHORT"
+    df = df.copy()
+    q = config.TOP_DECILE_THRESHOLD
+    if not point_in_time:
+        df = df.sort_values("composite_score", ascending=False)
+        pct = df["composite_score"].rank(pct=True, method="first")
+        df["decile"] = np.ceil(pct * 10).clip(1, 10).astype(int)
+        top_cut = df["composite_score"].quantile(q)
+        bot_cut = df["composite_score"].quantile(1 - q)
+        df["position"] = "NEUTRAL"
+        df.loc[df["composite_score"] >= top_cut, "position"] = "LONG"
+        df.loc[df["composite_score"] <= bot_cut, "position"] = "SHORT"
+    else:
+        df = df.sort_values("disclosure_date", kind="mergesort")
+        dates = df["disclosure_date"].to_numpy()
+        scores = df["composite_score"].to_numpy(dtype=float)
+        decile = np.full(len(df), np.nan)
+        position = np.array(["NEUTRAL"] * len(df), dtype=object)
+        for i in range(len(df)):
+            past = scores[dates < dates[i]]
+            past = past[np.isfinite(past)]
+            if len(past) < min_history or not np.isfinite(scores[i]):
+                continue
+            pct = (past < scores[i]).mean()
+            decile[i] = min(int(pct * 10) + 1, 10)
+            if scores[i] >= np.quantile(past, q):
+                position[i] = "LONG"
+            elif scores[i] <= np.quantile(past, 1 - q):
+                position[i] = "SHORT"
+        df["decile"] = decile
+        df["position"] = position
 
     logger.info(
-        "Signal ranking complete. LONG: %d, SHORT: %d, NEUTRAL: %d",
+        "Signal ranking complete (point_in_time=%s). LONG: %d, SHORT: %d, NEUTRAL: %d",
+        point_in_time,
         (df["position"] == "LONG").sum(),
         (df["position"] == "SHORT").sum(),
         (df["position"] == "NEUTRAL").sum(),
