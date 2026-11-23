@@ -18,3 +18,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: python -m pytest -q
+      - name: Results reproduce from the committed snapshot
+        run: python -m src.event_study analyze > /dev/null && git diff --exit-code results/metrics.json
+      - name: README numbers match the results
+        run: python scripts/render_readme.py --check

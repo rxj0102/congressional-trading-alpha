@@ -1,0 +1,112 @@
+{
+ "sample": {
+  "rows_parsed": 55876,
+  "stock_events": 43292,
+  "events_with_prices": 37096,
+  "tickers": 2480,
+  "first_filing": "2015-01-03",
+  "last_filing": "2026-09-22",
+  "purchases": 18252,
+  "sales": 18844,
+  "members": 254,
+  "lag_median": 27.0,
+  "late_share": 0.124515
+ },
+ "car": {
+  "pre": {
+   "n": 37095,
+   "buy_mean": -0.009645,
+   "sell_mean": -0.00635365,
+   "diff": -0.00329135,
+   "t": -1.57452,
+   "p": 0.115368
+  },
+  "5": {
+   "n": 37096,
+   "buy_mean": -0.00159675,
+   "sell_mean": -0.00174649,
+   "diff": 0.000149741,
+   "t": 0.172347,
+   "p": 0.863165
+  },
+  "20": {
+   "n": 36812,
+   "buy_mean": -0.00518186,
+   "sell_mean": -0.00390695,
+   "diff": -0.00127492,
+   "t": -0.78664,
+   "p": 0.431493
+  },
+  "60": {
+   "n": 36398,
+   "buy_mean": -0.013521,
+   "sell_mean": -0.0132544,
+   "diff": -0.000266569,
+   "t": -0.0932779,
+   "p": 0.925683
+  }
+ },
+ "late": {
+  "n_late": 4568,
+  "signed_on_time": 0.000245438,
+  "signed_late": -0.00631839,
+  "diff": -0.00656383,
+  "t": -3.43713,
+  "p": 0.000587904,
+  "robust": {
+   "winsorized_member_cluster_diff": -0.00619158,
+   "winsorized_member_cluster_t": -3.50586,
+   "top5_late_filers_share": 0.300569,
+   "without_top5_diff": -0.00729082,
+   "without_top5_t": -3.71531
+  }
+ },
+ "car_winsorized": {
+  "5": {
+   "diff": 3.94712e-05,
+   "t": 0.056075
+  },
+  "20": {
+   "diff": -0.0012361,
+   "t": -0.859903
+  },
+  "60": {
+   "diff": 0.000177801,
+   "t": 0.0703164
+  }
+ },
+ "calendar": {
+  "days": 2951,
+  "first_day": "2015-01-06",
+  "last_day": "2026-09-30",
+  "long_short_capm_alpha_annual": -0.00840129,
+  "long_short_capm_t": -0.394138,
+  "long_short_capm_p": 0.693479,
+  "long_short_ff3_alpha_annual": -0.00925461,
+  "long_short_ff3_t": -0.4336,
+  "long_short_ff3_p": 0.664579,
+  "long_only_excess_capm_alpha_annual": -0.0146083,
+  "long_only_excess_capm_t": -0.832524,
+  "long_only_excess_capm_p": 0.405113,
+  "long_only_excess_ff3_alpha_annual": -0.0097732,
+  "long_only_excess_ff3_t": -0.605807,
+  "long_only_excess_ff3_p": 0.544643,
+  "long_short_sharpe": -0.180652
+ },
+ "holm": {
+  "late minus on-time filings": 0.00352743,
+  "buy minus sell, 20 days": 1.0,
+  "long-short portfolio, three-factor alpha": 1.0,
+  "long-short portfolio, CAPM alpha": 1.0,
+  "buy minus sell, 5 days": 1.0,
+  "buy minus sell, 60 days": 1.0
+ },
+ "raw_p": {
+  "buy minus sell, 5 days": 0.863165,
+  "buy minus sell, 20 days": 0.431493,
+  "buy minus sell, 60 days": 0.925683,
+  "long-short portfolio, CAPM alpha": 0.693479,
+  "long-short portfolio, three-factor alpha": 0.664579,
+  "late minus on-time filings": 0.000587904
+ }
+}
