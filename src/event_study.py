@@ -27,7 +27,8 @@ Rules fixed before the first run on the rebuilt data:
   on-time filings.
 * The six tradable tests are corrected together with Holm.
 
-    python -m src.event_study build      # needs data/prices.parquet, writes data/snapshot/events.csv.gz
+    python -m src.event_study build          # House; needs data/prices.parquet, writes data/snapshot/events.csv.gz
+    python -m src.event_study build senate   # Senate extension, writes data/snapshot/senate_events.csv.gz
     python -m src.event_study analyze    # writes results/metrics.json from the snapshot
 """
 
@@ -46,6 +47,8 @@ TX = ROOT / "data" / "house_ptr_transactions.csv"
 PRICES = ROOT / "data" / "prices.parquet"
 FF = ROOT / "data" / "ff3_daily.csv"
 SNAP = ROOT / "data" / "snapshot" / "events.csv.gz"
+SENATE_TX = ROOT / "data" / "senate_ptr_transactions.csv"
+SENATE_SNAP = ROOT / "data" / "snapshot" / "senate_events.csv.gz"
 METRICS = ROOT / "results" / "metrics.json"
 WINDOWS = (5, 20, 60)
 HOLD = 20
@@ -53,8 +56,8 @@ FIRST_YEAR = 2015  # the Clerk's yearly indexes list no transaction reports befo
 LATE_DAYS = 45
 
 
-def load_events() -> pd.DataFrame:
-    tx = pd.read_csv(TX, parse_dates=["transaction_date", "notification_date", "filing_date"])
+def load_events(path: Path = TX) -> pd.DataFrame:
+    tx = pd.read_csv(path, parse_dates=["transaction_date", "filing_date"])
     n_all = len(tx)
     stock = (tx["asset_type"] == "ST") | (tx["asset_type"].isna() & ~tx["option"].astype(bool))
     ev = tx[stock & tx["ticker"].notna() & tx["transaction_type"].isin(["P", "S"])]
@@ -67,8 +70,9 @@ def load_events() -> pd.DataFrame:
     return ev
 
 
-def build() -> None:
-    ev = load_events()
+def build(chamber: str = "house") -> None:
+    snap = SNAP if chamber == "house" else SENATE_SNAP
+    ev = load_events(TX if chamber == "house" else SENATE_TX)
     px = pd.read_parquet(PRICES).sort_index()
     px.index = pd.to_datetime(px.index)
     ff = pd.read_csv(FF, parse_dates=["date"]).set_index("date")
@@ -113,15 +117,17 @@ def build() -> None:
         if np.isfinite(rec["car_5"]):
             rows.append(rec)
     out = pd.DataFrame(rows)
-    SNAP.parent.mkdir(parents=True, exist_ok=True)
-    out.to_csv(SNAP, index=False, float_format="%.6g")
+    snap.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(snap, index=False, float_format="%.6g")
     meta = {
         "rows_parsed": int(ev.attrs["n_rows_parsed"]),
         "stock_events": int(len(ev)),
         "events_with_prices": int(len(out)),
         "tickers": int(out["ticker"].nunique()),
     }
-    (SNAP.parent / "build_meta.json").write_text(json.dumps(meta, indent=1) + "\n")
+    (snap.parent / ("build_meta.json" if chamber == "house" else "senate_build_meta.json")).write_text(
+        json.dumps(meta, indent=1) + "\n"
+    )
     print(meta)
 
 
@@ -178,9 +184,23 @@ def calendar_portfolio(ev: pd.DataFrame, ff: pd.DataFrame) -> dict:
 
 
 def analyze() -> None:
-    ev = pd.read_csv(SNAP, parse_dates=["transaction_date", "filing_date", "entry_date"])
-    meta = json.loads((SNAP.parent / "build_meta.json").read_text())
+    """House results are the pre-specified study; the Senate, added later, is run with
+    the same six tests as a separate extension with its own Holm correction."""
     ff = pd.read_csv(FF, parse_dates=["date"]).set_index("date")
+    dates = ["transaction_date", "filing_date", "entry_date"]
+    m = compute(pd.read_csv(SNAP, parse_dates=dates), json.loads((SNAP.parent / "build_meta.json").read_text()), ff)
+    if SENATE_SNAP.exists():
+        m["senate"] = compute(
+            pd.read_csv(SENATE_SNAP, parse_dates=dates),
+            json.loads((SNAP.parent / "senate_build_meta.json").read_text()),
+            ff,
+        )
+    METRICS.parent.mkdir(parents=True, exist_ok=True)
+    METRICS.write_text(json.dumps(rounded(m), indent=1) + "\n")
+    print(json.dumps(rounded(m), indent=1))
+
+
+def compute(ev: pd.DataFrame, meta: dict, ff: pd.DataFrame) -> dict:
     ev["buy"] = (ev["type"] == "P").astype(float)
     ev["sign"] = np.where(ev["type"] == "P", 1.0, -1.0)
     m: dict = {"sample": meta | {
@@ -249,10 +269,11 @@ def analyze() -> None:
     }
     m["holm"] = holm(tests)
     m["raw_p"] = tests
-    METRICS.parent.mkdir(parents=True, exist_ok=True)
-    METRICS.write_text(json.dumps(rounded(m), indent=1) + "\n")
-    print(json.dumps(m, indent=1, default=float))
+    return m
 
 
 if __name__ == "__main__":
-    {"build": build, "analyze": analyze}[sys.argv[1]]()
+    if sys.argv[1] == "build":
+        build(sys.argv[2] if len(sys.argv) > 2 else "house")
+    else:
+        analyze()
