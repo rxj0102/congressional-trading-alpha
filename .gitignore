@@ -57,3 +57,6 @@ data/prices.parquet
 !data/house_ptr_transactions.csv
 !data/house_ptr_index.csv
 !data/ff3_daily.csv
+data/senate_raw/
+!data/senate_ptr_transactions.csv
+!data/senate_ptr_index.csv

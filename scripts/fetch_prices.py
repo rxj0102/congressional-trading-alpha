@@ -55,9 +55,12 @@ def main() -> None:
     import yfinance as yf
 
     tx = pd.read_csv(ROOT / "data" / "house_ptr_transactions.csv")
-    from src.event_study import load_events
+    from src.event_study import SENATE_TX, load_events
 
-    tickers = sorted(load_events()["ticker"].unique())
+    names = set(load_events()["ticker"])
+    if SENATE_TX.exists():
+        names |= set(load_events(SENATE_TX)["ticker"])
+    tickers = sorted(names)
     out = ROOT / "data" / "prices.parquet"
     have = pd.read_parquet(out) if out.exists() else pd.DataFrame()
     frames = [have] if not have.empty else []

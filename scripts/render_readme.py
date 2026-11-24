@@ -128,6 +128,40 @@ def results(m: dict) -> str:
     return "\n".join(lines)
 
 
+def senate(m: dict) -> str:
+    """Senate extension: same six tests, own Holm family."""
+    if "senate" not in m:
+        return "Not run."
+    se = m["senate"]
+    s, c, cal, late = se["sample"], se["car"], se["calendar"], se["late"]
+    surv = [k for k, v in se["holm"].items() if v < 0.05]
+    surv_txt = "; ".join(f"{k} (Holm p {se['holm'][k]:.3f})" for k in surv)
+    lines = [
+        f"Added after the House study, with the same rules and tests, and corrected as its own family. "
+        f"{s['events_with_prices']:,} Senate stock trades by {s['members']} senators, filed "
+        f"{s['first_filing'][:4]} to {s['last_filing'][:7]} ({s['purchases']:,} purchases, {s['sales']:,} sales; "
+        f"median lag {s['lag_median']:.0f} days).",
+        "",
+        "| Window | Events | Purchases minus sales | t |",
+        "|---|---|---|---|",
+    ]
+    names = {"pre": "Trade to filing (not tradable)", "5": "5 days after filing", "20": "20 days after filing", "60": "60 days after filing"}
+    for k, label in names.items():
+        lines.append(f"| {label} | {c[k]['n']:,} | {pct(c[k]['diff'])} | {c[k]['t']:.1f} |")
+    lines += [
+        "",
+        f"Long-short portfolio, three-factor alpha {pct(cal['long_short_ff3_alpha_annual'], 1)} a year "
+        f"(t = {cal['long_short_ff3_t']:.1f}); late minus on-time filings {pct(late['diff'])} signed over 20 days "
+        f"(t = {late['t']:.1f}, {late['n_late']:,} late events). "
+        + (
+            "No test survives the Holm correction."
+            if not surv
+            else f"Surviving the Holm correction: {surv_txt}."
+        ),
+    ]
+    return "\n".join(lines)
+
+
 def fill(text: str, name: str, body: str) -> str:
     a = text.index(MARK.format(name=name)) + len(MARK.format(name=name))
     b = text.index(END.format(name=name))
@@ -138,7 +172,7 @@ def main() -> None:
     m = json.loads((ROOT / "results" / "metrics.json").read_text())
     readme = ROOT / "README.md"
     text = readme.read_text()
-    new = fill(fill(text, "headline", headline(m)), "results", results(m))
+    new = fill(fill(fill(text, "headline", headline(m)), "results", results(m)), "senate", senate(m))
     if "--check" in sys.argv:
         if new != text:
             print("README is out of date; run python scripts/render_readme.py")
